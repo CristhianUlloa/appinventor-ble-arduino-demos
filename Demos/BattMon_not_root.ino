@@ -56,7 +56,7 @@ void setup() {
      This name will appear in advertising packets
      and can be used by remote devices to identify this BLE device
      The name can be changed but maybe be truncated based on space left in advertisement packet */
-  blePeripheral.setLocalName("CristhianArduino");
+  blePeripheral.setLocalName("BLEIntro");
   blePeripheral.setAdvertisedServiceUuid(batteryService.uuid());  // add the service UUID
   blePeripheral.setAdvertisedServiceUuid(ledService.uuid()); //TODO: conflict with above?
   blePeripheral.setAdvertisedServiceUuid(intService.uuid());
