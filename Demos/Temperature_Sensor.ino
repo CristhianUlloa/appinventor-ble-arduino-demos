@@ -6,7 +6,7 @@ BLEPeripheral blePeripheral;
 BLEService intService("19B10000-E8F2-537E-4F6C-D104768A1214");  // BLE int Service
 
 BLEIntCharacteristic tempChar("19B10002-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify);
-BLEIntCharacteristic moistChar("19B10003-E8F2-537E-4F6C-D104768A1214", BLERead);
+BLEIntCharacteristic moistChar("19B10003-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify);
 
 
 // create switch characteristic and allow remote device to read and write
@@ -15,8 +15,11 @@ BLEIntCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214"
 // Define the pin to which the temperature sensor is connected.
 const int pinTemp = A3;
 
-// TODO: pint for moisuture
-//const int pinMoisture = A2;
+// Define the pin for moisuture
+const int pinMoisture = A2;
+
+// Define the pin to which the LED is connected
+const int pinLED = 4;
 
 // Define the B-value of the thermistor.
 // This value is a property of the thermistor used in the Grove - Temperature Sensor,
@@ -33,9 +36,9 @@ void setup()
     // Configure the serial communication line at 9600 baud (bits per second.)
     Serial.begin(9600);
 
-    // TODO: change to a grove LED
+    
     pinMode(13, OUTPUT);   // initialize the LED on pin 13 to indicate when a central is connected
-
+    pinMode(pinLED, OUTPUT); // initialize Grove LED as well
 
     /* Set a local name for the BLE device
      This name will appear in advertising packets
@@ -78,18 +81,21 @@ void loop()
       Serial.println(central.address());
       // turn on the LED to indicate the connection:
       digitalWrite(13, HIGH);
+      digitalWrite(pinLED, HIGH);
   
       // check the battery level every 200ms
       // as long as the central is still connected:
       while (central.connected()) {
 
         updateTemperature();
+        updateMoisture();
         
         // Wait between measurements.
         delay(delayTime);
       }
       // when the central disconnects, turn off the LED:
       digitalWrite(13, LOW);
+      digitalWrite(pinLED, LOW);
       Serial.print("Disconnected from central: ");
       Serial.println(central.address());
     }
@@ -118,22 +124,22 @@ void updateTemperature() {
     
 }
 
-//void updateMoisture() {
-//    /*
-//     * Read the Moisture from A1 analog input pin
-//    */
-//    // Get the (raw) value of the moisture sensor.
-//    int moistureVal = analogRead(sensorPin);
-//  
-//    if (moistureVal != oldMoisture) {
-//        // Print the moisture value to the serial console.
-//        Serial.println("Moisture is now: ");
-//        Serial.println(moistureVal);
-//        moistChar.setValue(moistureVal);
-//        oldMoisture = moistureVal;
-//    }
-//    
-//}
+void updateMoisture() {
+    /*
+     * Read the Moisture from A1 analog input pin
+    */
+    // Get the (raw) value of the moisture sensor.
+    int moistureVal = analogRead(pinMoisture);
+    Serial.println("updateMoisture called");
+    if (moistureVal != oldMoisture) {
+        // Print the moisture value to the serial console.
+        Serial.println("Moisture is now: ");
+        Serial.println(moistureVal);
+        moistChar.setValue(moistureVal);
+        oldMoisture = moistureVal;
+    }
+    
+}
 
 void switchCharacteristicWritten(BLECentral& central, BLECharacteristic& characteristic) {
     // central wrote new value to characteristic, update time delay
